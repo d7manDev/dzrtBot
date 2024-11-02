@@ -3,8 +3,8 @@ import * as schedule from "node-cron";
 import * as cheerio from "cheerio";
 import axios from "axios";
 import "dotenv/config";
-const express = require("express");
-const app = express();
+import express from "express";
+var app = express();
 const BOT_DEVELOPER = 119250289; // bot developer chat identifier
 let product_dt = [];
 const url = [
