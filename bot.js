@@ -4,45 +4,60 @@ import * as cheerio from "cheerio";
 import axios from "axios";
 import "dotenv/config";
 const BOT_DEVELOPER = 119250289; // bot developer chat identifier
-
-const url = "https://www.dzrt.com/en-sa/category/nicotine-pouches";
-let proudct_detailes = [];
+let product_dt = [];
+const url = [
+  "https://www.dzrt.com/en-sa/products/icy-rush",
+  "https://www.dzrt.com/en-sa/products/seaside-frost",
+  "https://www.dzrt.com/en-sa/products/samra",
+  "https://www.dzrt.com/en-sa/products/highland-berries",
+  "https://www.dzrt.com/en-sa/products/mint-fusion",
+  "https://www.dzrt.com/en-sa/products/purple-mist",
+  "https://www.dzrt.com/en-sa/products/edgy-mint",
+  "https://www.dzrt.com/en-sa/products/mojito",
+  "https://www.dzrt.com/en-sa/products/garden-mint",
+  "https://www.dzrt.com/en-sa/products/tamra",
+  "https://www.dzrt.com/en-sa/products/spicy-zest",
+];
 const bot = new Bot(process.env.Bot_Token);
 let groups = [];
 // products detaile get info name,img,available
-async function getProudctsDt() {
+let getProudctsDt = async () => {
   try {
-    const { data: html } = await axios.get(url);
-    const $ = cheerio.load(html);
-    $(
-      "body > div > main > div > div > div.container.overflow-hidden.mt-3\\.5.lg\\:mt-10 > div.grid.grid-cols-2.gap-3.lg\\:grid-cols-5.lg\\:gap-6",
-    ).each((i, proudct) => {
-      const pName = $(proudct).extract({
-        name: ["div>a>div>span:first-of-type"],
+    for (const product of url) {
+      const { data: html } = await axios.get(product);
+      const $ = cheerio.load(html);
+      const div =
+        "body > div.flex.min-h-screen.w-full.flex-col > main > div > div > div.flex.max-w-320.flex-col.mx-auto.mb-10.lg\\:px-5 > div.flex.flex-col.lg\\:grid.lg\\:grid-cols-2.lg\\:gap-6";
+      const pName = $(div).find("div>div>h1:first-of-type").text();
+      const available = $(div).find("div>span:contains('OUT OF STOCK')").text();
+      product_dt.push({
+        name: pName,
+        available,
+        url: product,
       });
-      const pStock = $(proudct).extract({
-        available: ["div>a>span:first-of-type"],
-      });
-      proudct_detailes.push({
-        name: pName.name,
-        available: pStock.available,
-      });
-    });
+    }
+    return product_dt;
   } catch (err) {
     console.error("Error fetching data : ", err);
   }
-}
+};
 
 let check_avaliblity = async () => {
   await getProudctsDt();
   const is_avaliable = [];
   const unavaliable = [];
-  for (let i = 0; i < proudct_detailes.length; i++) {
-    if (proudct_detailes[0]?.available !== "OUT OF STOCK") {
-      is_avaliable.push(proudct_detailes[0]?.name[i] + " ✅");
+  const data = product_dt;
+  for (const product of data) {
+    if (product.available === "") {
+      is_avaliable.push({
+        name: product.name,
+        url: product.url,
+      });
     } else {
-      //FIX: dosen't push unavaliable to arr
-      unavaliable.push(proudct_detailes[0]?.name[i] + " ❌");
+      unavaliable.push({
+        name: product.name,
+        url: product.url,
+      });
     }
   }
   return { is_avaliable, unavaliable };
@@ -50,7 +65,7 @@ let check_avaliblity = async () => {
 //is group chat id allowed ?
 const is_allowed = (chatId) => {
   console.log("checking groups:", chatId);
-  return groups.includes(chatId);
+  return groups.includes(is_allowed);
 };
 // Set custom properties on context objects.
 bot.use(async (ctx, next) => {
@@ -76,6 +91,7 @@ bot.command("start", async (ctx) => {
     .url(`القناة الخاصة للتنبيهات`, "https://t.me/+VaChk04R5FczYmNk")
     .row()
     .text("التواصل مع المطور للاشتراك ", "dev")
+    .row()
     .text("تفعيل تنبيهات البوت", "notfiy");
   // NOTE: add sub button
   // .row()
@@ -147,34 +163,34 @@ bot.callbackQuery("dev", async (ctx) => {
 //
 // })
 bot.callbackQuery("notfiy", async (ctx) => {
-  if (groups.includes(ctx.chatId) || BOT_DEVELOPER) {
+  if (ctx.chatId !== 1) {
     try {
       const { is_avaliable, unavaliable } = await check_avaliblity();
       if ((is_avaliable, unavaliable)) {
         const inlineKeyboard = new InlineKeyboard();
         is_avaliable.forEach((produc) => {
-          inlineKeyboard.url(produc, url).row();
+          inlineKeyboard.url(`${produc.name} ✅`, produc.url).row();
         });
         unavaliable.forEach((product) => {
-          inlineKeyboard.url(product, url).row();
+          inlineKeyboard.url(`${product.name} ❌`, product.url).row();
         });
         await ctx.replyWithPhoto(
           "https://cdn.salla.sa/aqWbl/jwhDdVs7frRzBxFBof7Hrn9C6bi1lCrjFsFc1ppJ.jpg",
           {
-            caption: `🎉 تم تفعيل التنبيهات التلقائية للبوت، حاليها هذه هي المنتجات المتوفرة\n وفي حالي توفر اي منتجات اخرى سيرسل البوت تنبيه`,
+            caption: `🎉 تم تفعيل التنبيهات التلقائية للبوت، حاليا هذه هي المنتجات المتوفرة\n وفي حال توفر اي منتجات اخرى سيرسل البوت تنبيه`,
             reply_markup: inlineKeyboard,
           },
         );
         //TODO: make it every 30 min
-        schedule.schedule("*/1 * * * *", async () => {
+        schedule.schedule("*/56 * * * *", async () => {
           // check the proudct available every 30 mins
           try {
             await check_avaliblity();
-            console.log("check_avaliblity every 30 min");
+            console.log("check_avaliblity Corn Task ");
             await ctx.replyWithPhoto(
               "https://cdn.salla.sa/aqWbl/jwhDdVs7frRzBxFBof7Hrn9C6bi1lCrjFsFc1ppJ.jpg",
               {
-                caption: `المنتجات الممتوفرة الان، اطلبها من الموقع الرسمي`,
+                caption: `المنتجات المتوفرة الان، اطلبها من الموقع الرسمي`,
                 reply_markup: inlineKeyboard,
               },
             );
