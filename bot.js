@@ -3,6 +3,8 @@ import * as schedule from "node-cron";
 import * as cheerio from "cheerio";
 import axios from "axios";
 import "dotenv/config";
+const express = require("express");
+const app = express();
 const BOT_DEVELOPER = 119250289; // bot developer chat identifier
 let product_dt = [];
 const url = [
@@ -181,7 +183,6 @@ bot.callbackQuery("notfiy", async (ctx) => {
             reply_markup: inlineKeyboard,
           },
         );
-        //TODO: make it every 30 min
         schedule.schedule("*/56 * * * *", async () => {
           // check the proudct available every 30 mins
           try {
@@ -212,3 +213,6 @@ bot.callbackQuery("notfiy", async (ctx) => {
 });
 bot.start();
 console.log("bot is running...");
+app.listen(3001, () => {
+  console.log("Server is running.");
+});
