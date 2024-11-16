@@ -1,9 +1,13 @@
 import { InlineKeyboard, Api, Bot, Context } from "grammy";
-import * as schedule from "node-cron";
+import * as schedule from "node-schedule"
 import * as cheerio from "cheerio";
 import axios from "axios";
 import "dotenv/config";
 import express from "express";
+const rule = new schedule.RecurrenceRule();
+rule.hour = [6, 14, 22];
+rule.minute = 0;
+
 var app = express();
 const BOT_DEVELOPER = 119250289; // bot developer chat identifier
 let product_dt = [];
@@ -183,7 +187,8 @@ bot.callbackQuery("notfiy", async (ctx) => {
             reply_markup: inlineKeyboard,
           },
         );
-        schedule.schedule("*/56 * * * *", async () => {
+
+        schedule.scheduleJob(rule,async () => {
           // check the proudct available every 30 mins
           try {
             await check_avaliblity();
@@ -213,6 +218,3 @@ bot.callbackQuery("notfiy", async (ctx) => {
 });
 bot.start();
 console.log("bot is running...");
-app.listen(process.env.PORT || 3001, () => {
-  console.log("Server is running.");
-});
