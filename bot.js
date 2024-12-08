@@ -1,5 +1,5 @@
 import { InlineKeyboard, Api, Bot, Context } from "grammy";
-import * as schedule from "node-schedule"
+import * as schedule from "node-schedule";
 import * as cheerio from "cheerio";
 import axios from "axios";
 import "dotenv/config";
@@ -94,7 +94,7 @@ bot.command("start", async (ctx) => {
   ]);
   //start inlineKeyboard when bot starts
   const inlineKeyboard = new InlineKeyboard()
-    .url(`القناة الخاصة للتنبيهات`, "https://t.me/+VaChk04R5FczYmNk")
+    .url(`القناة الخاصة للتنبيهات`, "https://t.me/Dzrt_Notfiy")
     .row()
     .text("التواصل مع المطور للاشتراك ", "dev")
     .row()
@@ -188,7 +188,7 @@ bot.callbackQuery("notfiy", async (ctx) => {
           },
         );
 
-        schedule.scheduleJob(rule,async () => {
+        schedule.scheduleJob(rule, async () => {
           // check the proudct available every 30 mins
           try {
             await check_avaliblity();
