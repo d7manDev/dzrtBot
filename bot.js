@@ -9,6 +9,7 @@ rule.hour = [6, 14, 22];
 rule.minute = 0;
 
 var app = express();
+const port = 3000;
 const BOT_DEVELOPER = 119250289; // bot developer chat identifier
 let product_dt = [];
 const url = [
@@ -218,3 +219,6 @@ bot.callbackQuery("notfiy", async (ctx) => {
 });
 bot.start();
 console.log("bot is running...");
+app.listen(port, () => {
+  console.log(`start listing to ${port}`);
+});
