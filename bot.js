@@ -1,17 +1,14 @@
-import { InlineKeyboard, Api, Bot, Context } from "grammy";
+import { Bot, InlineKeyboard } from "grammy";
 import * as schedule from "node-schedule";
 import * as cheerio from "cheerio";
 import axios from "axios";
 import "dotenv/config";
-import express from "express";
 const rule = new schedule.RecurrenceRule();
 rule.hour = [6, 14, 22];
 rule.minute = 0;
 
-var app = express();
-const port = 3000;
 const BOT_DEVELOPER = 119250289; // bot developer chat identifier
-let product_dt = [];
+const product_dt = [];
 const url = [
   "https://www.dzrt.com/en-sa/products/icy-rush",
   "https://www.dzrt.com/en-sa/products/seaside-frost",
@@ -48,7 +45,7 @@ let getProudctsDt = async () => {
     console.error("Error fetching data : ", err);
   }
 };
-
+// check available items
 let check_avaliblity = async () => {
   await getProudctsDt();
   const is_avaliable = [];
@@ -106,7 +103,8 @@ bot.command("start", async (ctx) => {
   await ctx.replyWithPhoto(
     "https://cdn.salla.sa/aqWbl/jwhDdVs7frRzBxFBof7Hrn9C6bi1lCrjFsFc1ppJ.jpg",
     {
-      caption: `هلا ${ctx.from.first_name} \n بوت تنبيهات دزرت ينبهك كل ماتوفر منتج من دزرت \n اشترك اللحين ولا تخلي المنتجات تفوتك 🔔\n قيمة الاشتراك : 15 ريال لمدة 3 شهور`,
+      caption:
+        `هلا ${ctx.from.first_name} \n بوت تنبيهات دزرت ينبهك كل ماتوفر منتج من دزرت \n اشترك اللحين ولا تخلي المنتجات تفوتك 🔔\n قيمة الاشتراك : 15 ريال لمدة 3 شهور`,
       reply_markup: inlineKeyboard,
     },
   );
@@ -154,7 +152,9 @@ bot.command("dev", async (ctx) => {
       const uniqueUserNames = [...new Set(userNames)];
 
       ctx.reply(
-        `usercounts: ${uniqueUserNames.length}\nhandlers: ${uniqueUserNames.join(", ")}`,
+        `usercounts: ${uniqueUserNames.length}\nhandlers: ${
+          uniqueUserNames.join(", ")
+        }`,
       );
     }
   } else {
@@ -184,13 +184,14 @@ bot.callbackQuery("notfiy", async (ctx) => {
         await ctx.replyWithPhoto(
           "https://cdn.salla.sa/aqWbl/jwhDdVs7frRzBxFBof7Hrn9C6bi1lCrjFsFc1ppJ.jpg",
           {
-            caption: `🎉 تم تفعيل التنبيهات التلقائية للبوت، حاليا هذه هي المنتجات المتوفرة\n وفي حال توفر اي منتجات اخرى سيرسل البوت تنبيه`,
+            caption:
+              `🎉 تم تفعيل التنبيهات التلقائية للبوت، حاليا هذه هي المنتجات المتوفرة\n وفي حال توفر اي منتجات اخرى سيرسل البوت تنبيه`,
             reply_markup: inlineKeyboard,
           },
         );
 
         schedule.scheduleJob(rule, async () => {
-          // check the proudct available every 30 mins
+          // check the proudct available CornJob
           try {
             await check_avaliblity();
             console.log("check_avaliblity Corn Task ");
@@ -219,6 +220,3 @@ bot.callbackQuery("notfiy", async (ctx) => {
 });
 bot.start();
 console.log("bot is running...");
-app.listen(port, () => {
-  console.log(`start listing to ${port}`);
-});
