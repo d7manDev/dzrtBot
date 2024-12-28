@@ -6,8 +6,9 @@
 - cheerio
 - cornJob for schedule notfiy
 
-> [!NOTE] **if you want to use the dev command you should change the
-> BOT_DEVELOPER variable in bot.js file to your telgram id**
+> [!NOTE]
+> to use the dev command you should change the BOT_DEVELOPER in bot.js file to
+> your telgram id
 
 ## how to use 👇
 
